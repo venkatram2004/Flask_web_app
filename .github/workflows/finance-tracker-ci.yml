@@ -1,0 +1,43 @@
+name: Finance Tracker - Build, Run, and Playwright Tests
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install app dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright + pytest
+        run: |
+          pip install pytest playwright pytest-playwright
+          playwright install --with-deps chromium
+
+      - name: Start Flask app in background
+        run: |
+          nohup python app.py > app.log 2>&1 &
+          sleep 5   # give Flask a moment to boot on port 5000
+
+      - name: Run Playwright tests
+        run: pytest test_app.py -v
+
+      - name: Upload app log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flask-app-log
+          path: app.log
