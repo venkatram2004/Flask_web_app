@@ -31,6 +31,7 @@ def register(page: Page, username: str, password: str, role: str):
     page.get_by_role("button", name="submit").click()
 
 
+
 def register_and_login(page: Page, role: str) -> str:
     username = unique_username(role)
     register(page, username, TEST_PASSWORD, role)
